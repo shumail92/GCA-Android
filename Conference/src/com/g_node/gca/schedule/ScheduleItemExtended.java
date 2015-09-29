@@ -31,7 +31,7 @@ public class ScheduleItemExtended extends Activity {
 	private String SCHEDULE_ITEMTYPE_TRACK = "track";
 	private String SCHEDULE_ITEMTYPE_SESSION = "session";
 	
-	DatabaseHelper dbHelper = new DatabaseHelper(this);;
+	DatabaseHelper dbHelper = DatabaseHelper.getInstance(this);
 	
 	String event_abstract_uuid;
 	
@@ -72,25 +72,26 @@ public class ScheduleItemExtended extends Activity {
 			((TextView) findViewById(R.id.schedule_event_date)).setText(eventToDisplay.getDate());
 			((TextView) findViewById(R.id.schedule_event_type)).setText(eventToDisplay.getType().toUpperCase());
 			
+			if (eventToDisplay.getLocation().equals("")) {
+				findViewById(R.id.schedule_event_location_icon).
+				setVisibility(View.INVISIBLE);
+			}
 			
 			event_abstract_uuid = eventToDisplay.getEventAbstract();
 			event_abstract_uuid = event_abstract_uuid.substring(event_abstract_uuid.lastIndexOf("/")+1, event_abstract_uuid.length());
 			Log.i(LOG_TAG, "Abstract ID of event: " + event_abstract_uuid);
 			
-	        String query = "SELECT UUID , TOPIC, TITLE, ABSRACT_TEXT, STATE, SORTID, REASONFORTALK, MTIME, TYPE, DOI, COI, ACKNOWLEDGEMENTS FROM ABSTRACT_DETAILS where UUID = '" + event_abstract_uuid + "';";
-			
-	        Log.i(LOG_TAG, "query: " + query);
-	        
-			Cursor abstractForEventCursor = DatabaseHelper.database.rawQuery(query, null);
+			Cursor abstractForEventCursor = dbHelper.fetchAbtractDetailsByUUID(
+													 event_abstract_uuid);
 			
 			Button btnOpenAbstract = (Button) findViewById(R.id.btn_launch_Abstract_from_event);
 			
 			if(abstractForEventCursor.getCount() < 1) {
 				btnOpenAbstract.setEnabled(false);
-				btnOpenAbstract.setText("No Abstract Found");
+				btnOpenAbstract.setVisibility(View.GONE);
 				//btnOpenAbstract.setVisibility(View.GONE);
 			} else {
-				
+				btnOpenAbstract.setVisibility(View.VISIBLE);
 				btnOpenAbstract.setOnClickListener(new OnClickListener() {
 					
 					@Override

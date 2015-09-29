@@ -7,6 +7,7 @@
 package com.g_node.gca.abstracts;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,6 +31,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.webkit.WebView;
+import android.webkit.WebView.FindListener;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -51,7 +53,7 @@ public class AbstractContentTabFragment extends Fragment {
 
     TextView afName;
 
-    TextView authorNames;
+    TextView authors;
 
     TextView ConRefs;
 
@@ -61,16 +63,20 @@ public class AbstractContentTabFragment extends Fragment {
 
     Button btnOpenAbstractFig;
 
-    private String value;
+    private String uuid;
     
-    Cursor cursor, cursorOne, cursorTwo, referenceCursor;
+    private Cursor mAuthorCursor, mAffiliationCursor, mAbstractDataCursor, mReferenceCursor;    
+    
+	private final DatabaseHelper mDbHelper = DatabaseHelper
+			.getInstance(this.getActivity());
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		
 		setHasOptionsMenu(true);  
-		View rootView = inflater.inflate(R.layout.fragment_abstracts_content, container, false);
+		View rootView = inflater.inflate(R.layout.fragment_abstracts_content, 
+				container, false);
 		Log.i("GCA-Abs-Frag", "Abstract Content Fragment onCreateViews");
 			return rootView;
 	}
@@ -90,14 +96,13 @@ public class AbstractContentTabFragment extends Fragment {
          * Getting UUID of intent that's detail is to be shown.
          */
         
-        value = TabsPagerAdapter.getValue();
-        Log.i("GCA-Abs-Frag", "new value: " + value);
+        uuid = TabsPagerAdapter.getUuid();
+        Log.i("GCA-Abs-Frag", "new value: " + uuid);
 		
         /*
          * Run SQL Queries to fetch data from database.
-         */
-        
-        fetchBasicAbstractDataFromDB();
+         */        
+        mAbstractDataCursor = mDbHelper.fetchAbtractDetailsByUUID(uuid);
         
         /*
          * Fetch Authors name for abstract and update author name fields
@@ -171,7 +176,7 @@ public class AbstractContentTabFragment extends Fragment {
         /*
          * TextView for Abstract Author
          */
-        authorNames = (TextView)getView().findViewById(R.id.ConAuthor);
+        authors = (TextView)getView().findViewById(R.id.ConAuthor);
         /*
          * TextView for Affiliation Name
          */
@@ -191,91 +196,77 @@ public class AbstractContentTabFragment extends Fragment {
         /*
          * Clickable for showing images assosiated with Abstract
          */
-        btnOpenAbstractFig = (Button) getView().findViewById(R.id.btnOpenAbstractFig);
+        btnOpenAbstractFig = (Button) getView().findViewById(
+        		R.id.btnOpenAbstractFig);
+        //btnOpenAbstractFig.setVisibility(View.GONE);
     
 	}	//end intialUI
 	
 	
-	/*
-     * Function for executing SQL Queries that fetch next/prev or current abstract data
-     */
-    private void fetchBasicAbstractDataFromDB() {
-    	Log.i(gtag, "SQLQueries function");
-        String nextAbstractData = "SELECT UUID AS _id , TOPIC, TITLE, " +
-        		"ABSRACT_TEXT, STATE, SORTID, REASONFORTALK, MTIME, TYPE,DOI, COI, ACKNOWLEDGEMENTS " +
-        		"FROM ABSTRACT_DETAILS WHERE _id = '" + value + "';";
-        
-        //Cursor with next Abstract Data
-        cursorTwo = DatabaseHelper.database.rawQuery(nextAbstractData, null);
-    }
-    
+   
     /*
      * Function for getting Author Names for the abstract & add to the view
      */
     private void fetchAndUpdateAuthorsDataFromDB() {
-       
-        //Query for getting author name, email, position, affiliation data for the particular Abstract
-        String authorSQLQuery = "SELECT DISTINCT AUTHORS_DETAILS.AUTHOR_FIRST_NAME, " +
-        								"AUTHOR_MIDDLE_NAME, AUTHOR_LAST_NAME, AUTHOR_EMAIL, " +
-        								"ABSTRACT_AUTHOR_POSITION_AFFILIATION.AUTHOR_AFFILIATION, " +
-        								"ABSTRACT_AUTHOR_POSITION_AFFILIATION.AUTHOR_POSITION " +
-        						"FROM AUTHORS_DETAILS JOIN ABSTRACT_AUTHOR_POSITION_AFFILIATION USING (AUTHOR_UUID) " +
-        						"WHERE AUTHORS_DETAILS.AUTHOR_UUID IN " +
-        								"(SELECT AUTHOR_UUID FROM ABSTRACT_AUTHOR_POSITION_AFFILIATION WHERE ABSTRACT_UUID = '" + value + "') " +
-        							"AND ABSTRACT_AUTHOR_POSITION_AFFILIATION.AUTHOR_POSITION IN " +
-        								"(SELECT AUTHOR_POSITION FROM ABSTRACT_AUTHOR_POSITION_AFFILIATION WHERE ABSTRACT_UUID = '" + value + "') " +
-        						"ORDER BY AUTHOR_POSITION ASC;"; 
-        
-        cursor = DatabaseHelper.database.rawQuery(authorSQLQuery, null);
-        Log.i(gtag, "Auth executed query: rows = " + cursor.getCount());
-        
+        mAuthorCursor = mDbHelper.fetchAuthorsByAbsId(uuid);
+        Log.i(gtag, "Auth executed query: rows = " + mAuthorCursor.getCount());        
         List<String> abstractAuthorNames = new ArrayList<String>();
-        
-        if (cursor != null && cursor.moveToFirst()) {
+        if (mAuthorCursor != null && mAuthorCursor.moveToFirst()) {
 	        do {
 	        	Log.i(gtag, "in DO WHILE");
-	        	String authEmail = cursor.getString(cursor.getColumnIndexOrThrow("AUTHOR_EMAIL"));
+	        	String authEmail = mAuthorCursor.getString(mAuthorCursor
+	        			.getColumnIndexOrThrow("AUTHOR_EMAIL"));
 	        	Log.i(gtag, "author email => " + authEmail);
-	        	String authorName = cursor.getString(cursor.getColumnIndexOrThrow("AUTHOR_FIRST_NAME")) + " " +cursor.getString(cursor.getColumnIndexOrThrow("AUTHOR_LAST_NAME")) ;
-	        	String authAffiliation = cursor.getString(cursor.getColumnIndexOrThrow("AUTHOR_AFFILIATION"));
+	        	String authorName = mAuthorCursor.getString(mAuthorCursor
+	        			.getColumnIndexOrThrow("AUTHOR_FIRST_NAME")) + " " +
+	        			mAuthorCursor.getString(mAuthorCursor
+	        					.getColumnIndexOrThrow("AUTHOR_LAST_NAME")) ;
+	        	String authAffiliation = mAuthorCursor.getString(mAuthorCursor
+	        			.getColumnIndexOrThrow("AUTHOR_AFFILIATION"));
 	        	
 	        	//remove unwanted characters from affiliation superscript id's
-	        	String authAffiliationINTs = authAffiliation.replaceAll("[^0-9][,]", "");
-	        	
-	        	//pattern to get the digits so to increment those by one later so affiliation numbering starts from 1 instead of 0 
-	        	Pattern digitPattern = Pattern.compile("(\\d)"); // EDIT: Increment each digit.
+	        	String [] authAffiliations = authAffiliation.
+	        								 replaceAll("[^0-9][,]", "").
+	        								 split(",");
 
-	        	Matcher matcher = digitPattern.matcher(authAffiliationINTs);
-	        	StringBuffer result = new StringBuffer();
-	        	while (matcher.find())
-	        	{
-	        	    matcher.appendReplacement(result, String.valueOf(Integer.parseInt(matcher.group(1)) + 1));
+	        	if (!authAffiliations[0].equals("")){
+		        	int [] authAffiliationsInt = new int[authAffiliations.length];
+		        	int i = 0;
+	        		for (String affiliation_nr:authAffiliations){
+	        			authAffiliationsInt[i] = Integer.parseInt(
+	        					affiliation_nr)+1;
+	        			Arrays.sort(authAffiliationsInt);
+	        		}
+	        		i=0;
+		        	for (int affiliation_nr:authAffiliationsInt){
+		        		authAffiliations[i++] = Integer.toString(affiliation_nr);
+		        	}
 	        	}
-	        	matcher.appendTail(result);
-	        	authAffiliation = result.toString();
-	        	
+	        	String auth_affiliations_str = Arrays.toString(authAffiliations);
+	        	auth_affiliations_str = auth_affiliations_str.substring(1, 
+	        			                auth_affiliations_str.length()-1);
 	        	
 	        	if (abstractAuthorNames.indexOf(authorName) == -1 ) {
 	        		abstractAuthorNames.add(authorName);
 	        		
 	        		if (authEmail == null || authEmail.equals("null")) {
 		        		Log.i(gtag, "in author check - IF NULL");
-		        		authorNames.append(Html.fromHtml("<b>" + authorName + "</b><sup><small>"
-	                        + authAffiliation + "</small></sup><br/>"));
+		        		authors.append(Html.fromHtml("<b>" + authorName + "</b><sup><small>"
+	                        + auth_affiliations_str + "</small></sup><br/>"));
 
 		        	} else {
 		        		Log.i(gtag, "in author check - ELSE ");
 		        		//authorNames.append(Html.fromHtml("<b><a href=\"mailto:" + authEmail + "\">" + authorName + "</a>"  + "</b><sup><small>"
 		                //        + authAffiliation + "</small></sup><br/>"));
 		        		//authorNames.setMovementMethod(LinkMovementMethod.getInstance());
-		        		authorNames.append(Html.fromHtml("<b>" + authorName + "</b><sup><small>"
-		                        + authAffiliation + "</small></sup><br/>"));
+		        		authors.append(Html.fromHtml("<b>" + authorName + "</b><sup><small>"
+		                        + auth_affiliations_str + "</small></sup><br/>"));
 		        	}
 	        	} else {
 	        		;
 	        	}
 	        	
-	        } while (cursor.moveToNext());
+	        } while (mAuthorCursor.moveToNext());
         }
         
     	
@@ -287,38 +278,40 @@ public class AbstractContentTabFragment extends Fragment {
 	 *Function for getting affiliation names for that abstract and adding to the view 
 	 */
     private void fetchAndUpdateAffiliationNamesFromDB() {
-    	
-    	//SQL Query for getting affiliation data, position for the particular abstract
-        String affiliationsSQLQuery = 	"SELECT AFFILIATION_ADDRESS, AFFILIATION_COUNTRY, " +
-        										"AFFILIATION_DEPARTMENT, AFFILIATION_SECTION, AFFILIATION_POSITION " +
-        								"FROM AFFILIATION_DETAILS JOIN ABSTRACT_AFFILIATION_ID_POSITION USING (AFFILIATION_UUID) " +
-        								"WHERE AFFILIATION_UUID IN " +
-        									"(SELECT AFFILIATION_UUID FROM ABSTRACT_AFFILIATION_ID_POSITION " +
-        										"WHERE ABSTRACT_UUID = '" + value + "')  " +
-        								"ORDER BY AFFILIATION_POSITION ASC;";
+             
+        mAffiliationCursor = mDbHelper.fetchAffiliationsByAbsId(uuid);
+        Log.i(gtag, "Affiliation executed query: rows = " + mAffiliationCursor.getCount());
         
-        cursorOne = DatabaseHelper.database.rawQuery(affiliationsSQLQuery, null);
-        Log.i(gtag, "Affiliation executed query: rows = " + cursorOne.getCount());
-        
-        if (cursorOne != null && cursorOne.moveToFirst()) {
+        if (mAffiliationCursor != null && mAffiliationCursor.moveToFirst()) {
 	        do {
 	        	Log.i(gtag, "in DO WHILE aff");
-	        	String [] aff_array = {cursorOne.getString(cursorOne.getColumnIndexOrThrow("AFFILIATION_SECTION")),
-		        			cursorOne.getString(cursorOne.getColumnIndexOrThrow("AFFILIATION_DEPARTMENT")),	        	
-		        			cursorOne.getString(cursorOne.getColumnIndexOrThrow("AFFILIATION_ADDRESS")),
-		        			cursorOne.getString(cursorOne.getColumnIndexOrThrow("AFFILIATION_COUNTRY")) 
+	        	String [] aff_array = {mAffiliationCursor.getString(
+	        				mAffiliationCursor.getColumnIndexOrThrow(
+	        								"AFFILIATION_SECTION")),
+		        			mAffiliationCursor.getString(
+		        					mAffiliationCursor.getColumnIndexOrThrow(
+		        							"AFFILIATION_DEPARTMENT")),	        	
+		        			mAffiliationCursor.getString(
+		        					mAffiliationCursor.getColumnIndexOrThrow(
+		        							"AFFILIATION_ADDRESS")),
+		        			mAffiliationCursor.getString(
+		        					mAffiliationCursor.getColumnIndexOrThrow(
+		        							"AFFILIATION_COUNTRY")) 
 		        			};
 	        	String affName = "";
 	        	for (String txt:aff_array){
-	        		if (!txt.equals("null")){
-	        			affName = affName+txt+",";
+	        		if (!txt.equals("null")&&!txt.equals("")){
+	        			affName = affName+txt+", ";
 	        		}
 	        	}
-	        	affName = affName.substring(0, affName.length()-1);
-	        	int affPos = cursorOne.getInt(cursorOne.getColumnIndexOrThrow("AFFILIATION_POSITION"));
+	        	affName = affName.substring(0, affName.length()-2);
+	        	int affPos = mAffiliationCursor.getInt(
+	        			mAffiliationCursor.getColumnIndexOrThrow(
+	        					"AFFILIATION_POSITION"));
 	        	affPos++;
-	        	afName.append(Html.fromHtml(affPos + ": " + "<b>" + affName + "</b><br/>" ));
-	        } while (cursorOne.moveToNext());
+	        	afName.append(Html.fromHtml(affPos + ": " + "<b>" + affName + 
+	        			"</b><br/>" ));
+	        } while (mAffiliationCursor.moveToNext());
         }        
     }  //end affiliationName    
     
@@ -327,29 +320,25 @@ public class AbstractContentTabFragment extends Fragment {
 	 *Function for getting abstract title and adding to the view 
 	 */
     private void getAndUpdateAbstractTitle() {
-
-        cursorTwo.moveToFirst();
-
+        mAbstractDataCursor.moveToFirst();
         do {
 
-            String getTitle = cursorTwo.getString(cursorTwo.getColumnIndexOrThrow("TITLE"));
+            String getTitle = mAbstractDataCursor.getString(mAbstractDataCursor
+            		.getColumnIndexOrThrow("TITLE"));
             title.setText(getTitle);
-
-        } while (cursorTwo.moveToNext());
+        } while (mAbstractDataCursor.moveToNext());
     }
     
     /*
 	 *Function for getting abstract topic and adding to the view 
 	 */
     private void getAndUpdateAbstractTopic() {
-
-        cursorTwo.moveToFirst();
+        mAbstractDataCursor.moveToFirst();
         do {
-
-            String getTopic = cursorTwo.getString(cursorTwo.getColumnIndexOrThrow("TOPIC"));
+            String getTopic = mAbstractDataCursor.getString(mAbstractDataCursor
+            		.getColumnIndexOrThrow("TOPIC"));
             topic.setText(getTopic);
-
-        } while (cursorTwo.moveToNext());
+        } while (mAbstractDataCursor.moveToNext());
     }
     
     
@@ -357,37 +346,37 @@ public class AbstractContentTabFragment extends Fragment {
 	 *Function for getting abstract referenes and adding to the view 
 	 */
     private void getAndUpdateAbstractReferences() {
-
-    	String referenceSQLQuery = "SELECT * FROM ABSTRACT_REFERENCES WHERE ABSTRACT_UUID = '" 
-    	+ value +"';";
-        referenceCursor = DatabaseHelper.database.rawQuery(referenceSQLQuery, null);
+        mReferenceCursor = mDbHelper.fetchReferencesByAbsId(uuid);
         String referenceName;
-        if (referenceCursor != null && referenceCursor.moveToFirst()) {
+        if (mReferenceCursor != null && mReferenceCursor.moveToFirst()) {
         	int refNumber = 1;
         	do {
 	        	Log.i(gtag, "in DO WHILE References");
-	        	String ref_txt = referenceCursor.getString(
-	        			referenceCursor.getColumnIndexOrThrow("REF_TEXT"));
-	        	String ref_link = referenceCursor.getString(
-	        			referenceCursor.getColumnIndexOrThrow("REF_LINK"));
-	        	String ref_doi = referenceCursor.getString(
-	        			referenceCursor.getColumnIndexOrThrow("REF_DOI"));
-	        	
+	        	String ref_txt = mReferenceCursor.getString(
+	        			mReferenceCursor.getColumnIndexOrThrow("REF_TEXT"));
+	        	String ref_link = mReferenceCursor.getString(
+	        			mReferenceCursor.getColumnIndexOrThrow("REF_LINK"));
+	        	String ref_doi = mReferenceCursor.getString(
+	        			mReferenceCursor.getColumnIndexOrThrow("REF_DOI"));
+	        	referenceName = "";
 	        	if (!ref_txt.equals("null")){
-	        		referenceName = ref_txt;
+	        		referenceName += ref_txt + " ";
 	        	}
-	        	else if(!ref_link.equals("null")){
-	        		referenceName = ref_link;
+	        	if(!ref_link.equals("null")){
+	        		referenceName += ref_link + " ";
 	        	}
-	        	else if(!ref_doi.equals("null")){
-	        		referenceName = ref_doi;
+	        	if(!ref_doi.equals("null")){
+	        		referenceName += ref_doi + " ";
 	        	}
-	        	else{
-	        		referenceName = "";
-	        	}
-	        	ConRefs.append(Html.fromHtml(refNumber + ": " + referenceName + "<br/>" ));
+	        	
+	        	ConRefs.append(Html.fromHtml(refNumber+ ":"+referenceName + "<br/>" ));
 	        	refNumber++;
-	        } while (referenceCursor.moveToNext());
+	        } while (mReferenceCursor.moveToNext());
+        }
+        if (mReferenceCursor.getCount()==0){
+        	ConRefs.setVisibility(View.GONE);
+        	getView().findViewById(R.id.ConReferenceheading).
+        		setVisibility(View.GONE);
         }
     }
     
@@ -397,14 +386,16 @@ public class AbstractContentTabFragment extends Fragment {
 	 */
     private void getAndUpdateAbstractAcknowledgements() {
 
-        cursorTwo.moveToFirst();
+        mAbstractDataCursor.moveToFirst();
 
         do {
 
-            String acknowledgements = cursorTwo.getString(cursorTwo
-                    .getColumnIndexOrThrow("ACKNOWLEDGEMENTS"));
+            String acknowledgements = mAbstractDataCursor.getString(
+            		mAbstractDataCursor.getColumnIndexOrThrow(
+            				"ACKNOWLEDGEMENTS"));
 
-            if (acknowledgements.length() > 0) {
+            if (acknowledgements.length() > 0&&!acknowledgements.equals("null")) {
+            	ConAck.setVisibility(View.VISIBLE);
             	if(acknowledgements.equals("null")){
             		ConAck.append("");
             	}else{
@@ -412,8 +403,13 @@ public class AbstractContentTabFragment extends Fragment {
             	}
                 
             }
+            else{
+            	ConAck.setVisibility(View.GONE);
+            	getView().findViewById(R.id.ConAcknowledgeheading).setVisibility(View.GONE);
+            	getView().findViewById(R.id.bar3).setVisibility(View.GONE);            	
+            }
 
-        } while (cursorTwo.moveToNext());
+        } while (mAbstractDataCursor.moveToNext());
         
     }
     
@@ -422,17 +418,17 @@ public class AbstractContentTabFragment extends Fragment {
 	 */
     private void getAndUpdateAbstractContent() {
 
-        cursorTwo.moveToFirst();
-
+        mAbstractDataCursor.moveToFirst();
             do {
-
-                String Text = cursorTwo.getString(cursorTwo.getColumnIndexOrThrow("ABSRACT_TEXT"));
+                String Text = mAbstractDataCursor.getString(mAbstractDataCursor
+                		.getColumnIndexOrThrow("ABSRACT_TEXT"));
                 Text = TextUtils.htmlEncode(Text);
                 content.getSettings().setJavaScriptEnabled(true);
         		content.getSettings().setBuiltInZoomControls(false);
         		if (Text.contains("$")){
         		//if (true){
-	        		content.loadDataWithBaseURL("http://bar", "<script type='text/x-mathjax-config'>"
+	        		content.loadDataWithBaseURL(
+	        				"http://bar", "<script type='text/x-mathjax-config'>"
 	        				+"MathJax.Hub.Config({ "
 	        				+"showMathMenu: false, "
 	        				+"jax: ['input/TeX','output/HTML-CSS'], "
@@ -452,20 +448,22 @@ public class AbstractContentTabFragment extends Fragment {
         		}
                 
 
-            } while (cursorTwo.moveToNext());
+            } while (mAbstractDataCursor.moveToNext());
             
             //parsing SortID to extract group id & poster number and add it to abstract text body.
-            cursorTwo.moveToFirst();
-            int sortID = cursorTwo.getInt(cursorTwo.getColumnIndexOrThrow("SORTID"));
+            mAbstractDataCursor.moveToFirst();
+            int sortID = mAbstractDataCursor.getInt(mAbstractDataCursor
+            		.getColumnIndexOrThrow("SORTID"));
             Log.i("GCA-SortID", "Sort ID: " + sortID);
             if(sortID != 0) {	
             	int groupid =  ((sortID & (0xFFFF << 16)) >> 16);
             	int poster_no = sortID & 0xFFFF;
             	Log.i("GCA-groupid", "groupid: " + groupid);
             	Log.i("GCA-posterno", "Poster Nr: " + poster_no);
-            	//absSortID.append("\r\nSort ID: " + sortID);
+            	absSortID.append("\r\nSort ID: " + sortID);
             	title.append("   (" + get_groupid_str(groupid));
             	title.append("" + poster_no+")");
+            	absSortID.setVisibility(View.GONE);
             
             }else {
             	absSortID.setVisibility(View.GONE);
@@ -485,66 +483,74 @@ public class AbstractContentTabFragment extends Fragment {
 	 * Function for getting abstract figures and updating the button 
 	 */
     private void getAndUpdateAbstractFiguresBtn() {
-    	String getFiguresQuery = "SELECT * FROM ABSTRACT_FIGURES WHERE ABSTRACT_UUID = '" + value +"';";
-    	Cursor absFiguresCursor = DatabaseHelper.database.rawQuery(getFiguresQuery, null);
-    	
+    	Cursor absFiguresCursor = mDbHelper.fetchFiguresByAbsId(uuid);
     	if(absFiguresCursor.getCount() > 0) {
-    		btnOpenAbstractFig.setText("Show Figures" + "  (" + absFiguresCursor.getCount() + ")");
+    		btnOpenAbstractFig.setVisibility(View.VISIBLE);
+    		btnOpenAbstractFig.setText("Show Figures" + "  (" + absFiguresCursor
+    				.getCount() + ")");
     		
-    		btnOpenAbstractFig.setOnClickListener(new OnClickListener() {
-				
+    		btnOpenAbstractFig.setOnClickListener(new OnClickListener() {				
 				@Override
 				public void onClick(View arg0) {
 					//if Internet is connected
 					if(isNetworkAvailable()){
 						
 						//check if interent is WIFI
-						ConnectivityManager connManager = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-						NetworkInfo mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-						NetworkInfo mMobile = connManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+						ConnectivityManager connManager = 
+								(ConnectivityManager) getActivity()
+								.getSystemService(Context.CONNECTIVITY_SERVICE);
+						NetworkInfo mWifi = connManager.getNetworkInfo(
+								ConnectivityManager.TYPE_WIFI);
+						NetworkInfo mMobile = connManager.getNetworkInfo(
+								ConnectivityManager.TYPE_MOBILE);
 						
 						if (mWifi.isConnected()) {
 							//Toast.makeText(getActivity(), "Connected via WLAN", Toast.LENGTH_SHORT).show();
-							Intent figuresIntent = new Intent(getActivity(), AbstractFiguresActivity.class);
-							figuresIntent.putExtra("abs_uuid", value);
+							Intent figuresIntent = new Intent(getActivity(), 
+									AbstractFiguresActivity.class);
+							figuresIntent.putExtra("abs_uuid", uuid);
 							startActivity(figuresIntent);
 						
 						} else if(mMobile.isConnected()) {
 							//if connected with mobile data - 2G, 3G, 4G etc
 							//Toast.makeText(getActivity(), "Connected via Mobile Internet", Toast.LENGTH_SHORT).show();
 							
-							AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-							builder.setTitle("Additional Traffic Warning").setMessage("Downloading of Figures over Mobile Internet may create additional Traffic. Do you want to Continue ?")
-							       .setPositiveButton("Continue", new DialogInterface.OnClickListener() {
+							AlertDialog.Builder builder = new AlertDialog
+									.Builder(getActivity());
+							builder.setTitle("Additional Traffic Warning")
+							.setMessage("Downloading of Figures over Mobile Internet may create additional Traffic. Do you want to Continue ?")
+							       .setPositiveButton("Continue", 
+							    		   new DialogInterface.OnClickListener() {
 							           public void onClick(DialogInterface dialog, int id) {
 							               // if user Agrees to continue
-							        	   Intent figuresIntent = new Intent(getActivity(), AbstractFiguresActivity.class);
-											figuresIntent.putExtra("abs_uuid", value);
+							        	   Intent figuresIntent = new Intent(
+							        			   getActivity(), 
+							        			   AbstractFiguresActivity.class);
+											figuresIntent.putExtra("abs_uuid", uuid);
 											startActivity(figuresIntent);
 							           }
 							       })
-							       .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+							       .setNegativeButton("Cancel", 
+							    		   new DialogInterface.OnClickListener() {
 							           public void onClick(DialogInterface dialog, int id) {
 							               // Handle Cancel
 							        	   dialog.cancel();
 							           }
 							       })
 							       .setIcon(android.R.drawable.ic_dialog_alert)
-								     .show();
-							
+								     .show();							
 						} else {
 							;
 						}	//end if/else of wlan/mobile
 						
 					} else {
 						Toast.makeText(getActivity(), "Not Connected to Internet - Please connect to Internet first", Toast.LENGTH_SHORT).show();
-					} 	//end if/else of isNetworkAvailable
-					
+					} 	//end if/else of isNetworkAvailable					
 				}
 			});
     	
     	}else{
-    		btnOpenAbstractFig.setText("No Figures Found");
+    		btnOpenAbstractFig.setVisibility(View.GONE);
     		btnOpenAbstractFig.setEnabled(false);
     		//btnOpenAbstractFig.setVisibility(View.GONE);
     	}
@@ -560,7 +566,7 @@ public class AbstractContentTabFragment extends Fragment {
             content.loadData("", "text/html","utf-8");
             ConRefs.setText("");
             afName.setText("");
-            authorNames.setText("");
+            authors.setText("");
             ConAck.setText("");
             absSortID.setText("");
 
