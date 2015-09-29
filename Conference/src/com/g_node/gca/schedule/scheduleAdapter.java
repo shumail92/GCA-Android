@@ -51,25 +51,21 @@ public class scheduleAdapter extends BaseAdapter {
 
 	@Override
 	public int getCount() {
-		// TODO Auto-generated method stub
 		return scheduleItemsGeneralList.size();
 	}
 
 	@Override
 	public Object getItem(int arg0) {
-		// TODO Auto-generated method stub
 		return scheduleItemsGeneralList.get(arg0);
 	}
 
 	@Override
 	public long getItemId(int arg0) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	public View getView(int arg0, View arg1, ViewGroup arg2) {
-		// TODO Auto-generated method stub
 		Log.i("GCA-B-Schedule", "Line 70");
 		View vi = arg1;
 		ScheduleItemRecord y = scheduleItemsGeneralList.get(arg0);

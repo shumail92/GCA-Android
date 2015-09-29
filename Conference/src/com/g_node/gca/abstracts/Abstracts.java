@@ -225,7 +225,6 @@ private class AbstractJSONParsingTask extends AsyncTask<Void, Void, Void> {
 	        listView.setOnItemClickListener(new OnItemClickListener() {
 	            @Override
 	            public void onItemClick(AdapterView<?> arg0, View view, int position, long arg3) {
-	                // TODO Auto-generated method stub
 
 	                try {
 	                    cursor = (Cursor)cursorAdapter.getCursor();
@@ -271,7 +270,6 @@ private class AbstractJSONParsingTask extends AsyncTask<Void, Void, Void> {
 
 	            @Override
 	            public void onTextChanged(CharSequence cs, int start, int before, int count) {
-	                // TODO Auto-generated method stub
 	                Abstracts.this.cursorAdapter.getFilter().filter(cs);
 	                Abstracts.this.cursorAdapter.notifyDataSetChanged();
 
@@ -279,13 +277,11 @@ private class AbstractJSONParsingTask extends AsyncTask<Void, Void, Void> {
 
 	            @Override
 	            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-	                // TODO Auto-generated method stub
 
 	            }
 
 	            @Override
 	            public void afterTextChanged(Editable s) {
-	                // TODO Auto-generated method stub
 
 	            }
 	        });

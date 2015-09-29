@@ -99,13 +99,11 @@ public class MapActivity extends FragmentActivity {
 				
 				@Override
 				public View getInfoWindow(Marker arg0) {
-					// TODO Auto-generated method stub
 					return null;
 				}
 				
 				@Override
 				public View getInfoContents(Marker arg0) {
-					// TODO Auto-generated method stub
 					// Getting view from the layout file info_window_layout
 	                View v = getLayoutInflater().inflate(R.layout.info_window_layout, null);
 	

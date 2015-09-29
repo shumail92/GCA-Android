@@ -96,13 +96,11 @@ public class NewsAdapter extends ArrayAdapter<NewsItemSingle> {
 
 			@Override
 			public void onLoadingStarted(String arg0, View arg1) {
-				// TODO Auto-generated method stub
 				
 			}
 
 			@Override
 			public void onLoadingCancelled(String arg0, View arg1) {
-				// TODO Auto-generated method stub
 				
 			}
 
@@ -114,7 +112,6 @@ public class NewsAdapter extends ArrayAdapter<NewsItemSingle> {
 
 			@Override
 			public void onLoadingFailed(String arg0, View arg1, FailReason arg2) {
-				// TODO Auto-generated method stub
 				
 			}
 			
@@ -134,7 +131,6 @@ public class NewsAdapter extends ArrayAdapter<NewsItemSingle> {
 			Date date = formatter.parse(getItem(pos).getPubDate());
 			parsedPubDate = formatter.format(date);
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		

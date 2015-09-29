@@ -50,7 +50,6 @@ public class DateWiseEventsRecord {
 			date = new SimpleDateFormat("yyyy-M-dd").parse(group_date);
 			
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return date.toString().substring(0, 10);

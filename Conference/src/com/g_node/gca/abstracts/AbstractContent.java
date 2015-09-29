@@ -43,7 +43,6 @@ public class AbstractContent extends FragmentActivity implements
     
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
-        // TODO Auto-generated method stub
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_abstractcontent_viewpager);
         
@@ -95,7 +94,6 @@ public class AbstractContent extends FragmentActivity implements
     
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // TODO Auto-generated method stub
 
         MenuInflater inflater = getMenuInflater();
 
@@ -119,7 +117,6 @@ public class AbstractContent extends FragmentActivity implements
     
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // TODO Auto-generated method stub
     	
     	switch (item.getItemId()) {
         /*

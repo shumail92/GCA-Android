@@ -70,7 +70,6 @@ public class ScheduleMainActivity extends FragmentActivity implements ActionBar.
 			@Override
 			public void onPageScrollStateChanged(int arg0) {
 				
-				// TODO Auto-generated method stub
 				Log.i(LOG_TAG, "at 100 of schedule activity");
 //				actionBar.setSelectedNavigationItem(1);
 				Log.i(LOG_TAG, "at 102 of schedule activity");
@@ -79,13 +78,11 @@ public class ScheduleMainActivity extends FragmentActivity implements ActionBar.
 
 			@Override
 			public void onPageScrolled(int arg0, float arg1, int arg2) {
-				// TODO Auto-generated method stub
 				
 			}
 
 			@Override
 			public void onPageSelected(int arg0) {
-				// TODO Auto-generated method stub
 				actionBar.setSelectedNavigationItem(arg0);
 			}
  			
@@ -97,7 +94,6 @@ public class ScheduleMainActivity extends FragmentActivity implements ActionBar.
 	
 	@Override
 	protected void onResume() {
-		// TODO Auto-generated method stub
 		super.onResume();
 		Log.i("GCA-Performance", "in on Resume of Schedule main");
 		Log.i("GCA-Performance", "in on Resume - Time: " + System.currentTimeMillis());
@@ -106,14 +102,12 @@ public class ScheduleMainActivity extends FragmentActivity implements ActionBar.
 	
 	@Override
 	public void onTabReselected(Tab arg0, FragmentTransaction arg1) {
-		// TODO Auto-generated method stub
 		
 	}
 
 
 	@Override
 	public void onTabSelected(Tab arg0, FragmentTransaction arg1) {
-		// TODO Auto-generated method stub
 		viewPager.setCurrentItem(arg0.getPosition());
 		
 	}
@@ -121,7 +115,6 @@ public class ScheduleMainActivity extends FragmentActivity implements ActionBar.
 
 	@Override
 	public void onTabUnselected(Tab arg0, FragmentTransaction arg1) {
-		// TODO Auto-generated method stub
 		
 	}
 

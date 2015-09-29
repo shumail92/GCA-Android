@@ -25,7 +25,6 @@ public class SchedulePagerAdapter extends FragmentStatePagerAdapter {
 
 	public SchedulePagerAdapter(FragmentManager fm) {
 		super(fm);
-		// TODO Auto-generated constructor stub
 	}
 	
 	public void setLists(List<ScheduleItemRecord> _items, List<EventScheduleItem> _eventsList, List<TrackScheduleItem> _tracksList, List<SessionScheduleItem> _sessionsList, List<DateWiseEventsRecord> _dateWiseEventsRecordList) {
@@ -38,7 +37,6 @@ public class SchedulePagerAdapter extends FragmentStatePagerAdapter {
 
 	@Override
 	public Fragment getItem(int arg0) {
-		// TODO Auto-generated methdod stub
 		Log.i("GCA-Schedule-Fragment", "getItem called for tab: " + arg0);
 		
 		DateWiseEventsRecord groupedEventRecordForThisFragment = dateWiseEventsRecordList.get(arg0);
@@ -72,7 +70,6 @@ public class SchedulePagerAdapter extends FragmentStatePagerAdapter {
 	@Override
 	public int getCount() {
 		Log.i("GCA-Schedule-Fragment", "getcount called");
-		// TODO Auto-generated method stub
 		return dateWiseEventsRecordList.size();
 	}
 	

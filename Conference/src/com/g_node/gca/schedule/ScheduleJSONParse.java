@@ -153,7 +153,6 @@ public class ScheduleJSONParse {
             }
             
 		} catch (Exception e) {
-            // TODO: handle exception
 			Log.e(LOG_TAG, e.getMessage());
 			Log.e(LOG_TAG,Log.getStackTraceString(e));
         }	
@@ -331,7 +330,6 @@ public class ScheduleJSONParse {
 			try {
 				tempDateGroup = dateWiseEventsRecordList.get(indexOfCurrentDate);
 			} catch (IndexOutOfBoundsException e) {
-				// TODO: handle exception
 				dateWiseEventsRecordList.add(new DateWiseEventsRecord(dateOfCurrentEventItem));
 				tempDateGroup = dateWiseEventsRecordList.get(indexOfCurrentDate);
 			}

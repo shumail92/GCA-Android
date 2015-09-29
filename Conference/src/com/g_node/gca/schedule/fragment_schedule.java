@@ -76,7 +76,6 @@ public class fragment_schedule extends Fragment {
 
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View v, int position, long id) {
-				// TODO Auto-generated method stub
 				
 				Log.i("GCA-Schedule-List", "Clicked Item - int position: " + position);
 				Log.i("GCA-Schedule-List", "Clicked Item - Long ID: " + id);

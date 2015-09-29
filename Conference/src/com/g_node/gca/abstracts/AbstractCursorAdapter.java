@@ -34,7 +34,6 @@ public class AbstractCursorAdapter extends CursorAdapter {
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        // TODO Auto-generated method stub
         /*
          * TextView for showing Title
          */
@@ -163,7 +162,6 @@ public class AbstractCursorAdapter extends CursorAdapter {
 
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup viewgroup) {
-        // TODO Auto-generated method stub
         LayoutInflater inflater = LayoutInflater.from(viewgroup.getContext());
         View returnView = inflater.inflate(R.layout.abstract_content, viewgroup, false);
         return returnView;

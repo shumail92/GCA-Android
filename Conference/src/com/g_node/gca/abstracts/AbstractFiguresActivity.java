@@ -68,7 +68,6 @@ public class AbstractFiguresActivity extends Activity {
 
 	@Override
 	protected void onDestroy() {
-		// TODO Auto-generated method stub
 		super.onDestroy();
 		this.adapter.imageLoader.destroy();
 	}	

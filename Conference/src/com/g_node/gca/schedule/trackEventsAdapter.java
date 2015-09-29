@@ -33,26 +33,22 @@ public class trackEventsAdapter extends BaseAdapter {
 	
 	@Override
 	public int getCount() {
-		// TODO Auto-generated method stub
 		Log.i("GCA-Events", "Size of EventsRecordsList: " + eventsRecordsList.size());
 		return eventsRecordsList.size();
 	}
 
 	@Override
 	public Object getItem(int arg0) {
-		// TODO Auto-generated method stub
 		return eventsRecordsList.get(arg0);
 	}
 
 	@Override
 	public long getItemId(int arg0) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	public View getView(int arg0, View arg1, ViewGroup arg2) {
-		// TODO Auto-generated method stub
 		
 		View vi = arg1;
 		

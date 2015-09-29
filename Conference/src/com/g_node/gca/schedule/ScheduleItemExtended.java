@@ -96,7 +96,6 @@ public class ScheduleItemExtended extends Activity {
 					
 					@Override
 					public void onClick(View arg0) {
-						// TODO Auto-generated method stub
 						
 						Intent intent = new Intent(ScheduleItemExtended.this, AbstractContent.class);
 						intent.putExtra("value", event_abstract_uuid);
@@ -137,7 +136,6 @@ public class ScheduleItemExtended extends Activity {
 					
 					@Override
 					public void onClick(View arg0) {
-						// TODO Auto-generated method stub
 						Intent launchEventDetail = new Intent(ScheduleItemExtended.this, ScheduleItemExtended.class);
 
 						Bundle bundle = new Bundle();
@@ -225,7 +223,6 @@ public class ScheduleItemExtended extends Activity {
 	
 	@Override
 	protected void onDestroy() {
-		// TODO Auto-generated method stub
 		dbHelper.close();
 		super.onDestroy();
 	}

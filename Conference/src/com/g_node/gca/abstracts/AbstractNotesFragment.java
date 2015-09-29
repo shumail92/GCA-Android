@@ -72,7 +72,6 @@ public class AbstractNotesFragment extends Fragment{
 
 			@Override
 			public void onClick(View arg0) {
-				// TODO Auto-generated method stub
 				AddNoteDialogFragment addNoteFragment = AddNoteDialogFragment
 						.newInstance(uuid);
 				addNoteFragment.show(getFragmentManager(), "fragment_add_note");
@@ -85,7 +84,6 @@ public class AbstractNotesFragment extends Fragment{
 
 			@Override
 			public void onClick(View arg0) {
-				// TODO Auto-generated method stub
 				populateListView();
 				Toast.makeText(getActivity(), "Notes Refrshed.",
 						Toast.LENGTH_SHORT).show();
@@ -97,7 +95,6 @@ public class AbstractNotesFragment extends Fragment{
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
 					long arg3) {
-				// TODO Auto-generated method stub
 				Builder x = new AlertDialog.Builder(getActivity());
 				String noteTitle = notesCursor.getString(notesCursor
 						.getColumnIndexOrThrow("NOTE_TITLE"));
